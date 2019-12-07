@@ -22,7 +22,7 @@ function chooseRecipient() {
         // TODO make this a name
         text: user.user_psid,
         click: () => {
-          chat.recipientPsid = user.user_psid;
+          chat.recipient.psid = user.user_psid;
           $('#friendsModal').modal('hide');
 
           // Recipient
@@ -79,15 +79,15 @@ function connectSocket() {
 
 ((chat) => {
   // TODO change this to be actual PSID from messenger
-  chat.sender = { psid: chat.sender.psid || window.location.hash.substring(1) };
-  chat.recipient = { psid: chat.recipient.psid || undefined };
-  if (!chat.recipient.psid) chooseRecipient();
+  window.chat.sender = { psid: window.chat.sender.psid || window.location.hash.substring(1) };
+  window.chat.recipient = { psid: window.chat.recipient.psid || undefined };
+  if (!window.chat.recipient.psid) chooseRecipient();
 
   $('#send-message').click(function () {
     const message = $('#user-message').val();
-    chat.socket.emit('send_message', {
+    window.chat.socket.emit('send_message', {
       force: false,
-      recipientPsid: chat.recipient.psid,
+      recipientPsid: window.chat.recipient.psid,
       message,
       senderAvatar: 'https://via.placeholder.com/150.png',
     }, data => {
@@ -104,4 +104,4 @@ function connectSocket() {
         addMessage(message, true, data.timestamp);
     });
   });
-})(chat = {} || window.chat);
+})(window.chat = { sender: {}, recipient: {}} || window.chat);

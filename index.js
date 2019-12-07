@@ -109,7 +109,7 @@ io.sockets.on('connection', socket => {
 
   socket.on('send_message', (data, callback) => {
     // data = { force, recipientPsid, message, senderAvatar }
-    console.log('user sent message');
+    console.log('user sent message', data);
     let rejected = false;
 
     if (!data.force) {
