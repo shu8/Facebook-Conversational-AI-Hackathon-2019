@@ -1,7 +1,6 @@
 const io = require('socket.io')(8080);
 const sqlite = require('sqlite3');
 const fs = require('fs');
-const request = require('request');
 const restify = require('restify');
 
 const server = restify.createServer({
@@ -11,6 +10,13 @@ const server = restify.createServer({
 server.use(restify.plugins.acceptParser(server.acceptable));
 server.use(restify.plugins.queryParser());
 server.use(restify.plugins.bodyParser());
+server.use(
+  function crossOrigin(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    return next();
+  }
+);
 
 server.get('/users', (req, res, next) => {
   db.all('SELECT * FROM users', (err, users) => {
@@ -54,7 +60,11 @@ db.exec(schema, err => {
 console.log('db initialised');
 
 let clients = [];
-const client = psid => clients.find(c => c.psid === psid);
+function client(psid) {
+  console.log(clients);
+  const c = clients.find(c => c.psid === psid.toString());
+  return c ? c.socket : undefined;
+}
 
 io.on('connection', socket => {
   // `?psid=[blah]&first_name=[blah]&last_name=[blah]` should be appended to socket URL in client
@@ -72,7 +82,7 @@ io.on('connection', socket => {
   clients.push({ psid, socket });
 
   socket.on('disconnect', () => {
-    console.log('user disconnected', socket);
+    console.log('user disconnected');
     clients = clients.filter(c => c.psid !== psid);
   });
 
@@ -89,20 +99,28 @@ io.on('connection', socket => {
     // Tell sender it was rejected
     if (rejected) return callback({ error: false, rejected });
 
-    // TODO (future) send websocket notification to recipient
+    // TODO (future) send messenger websocket notification to recipient
+    const timestamp = new Date().getTime();
     db.run('INSERT INTO messages (sender_psid, recipient_psid, message) VALUES (?, ?, ?)', psid, data.recipientPsid, data.message, err => {
       if (err) {
         // Tell sender there was an error sending
         callback({ error: true, message: err.toString(), rejected });
         return console.log('Error inserting message into db', err);
       }
+      callback({ error: false, rejected: false, timestamp });
 
       // Send message to recipient
-      client(data.recipientPsid).send('message', {
-        message: data.message,
-        senderPsid: psid,
-        senderAvatar: data.senderAvatar,
-      });
+      const recipient = client(data.recipientPsid);
+      if (recipient) {
+        recipient.emit('message', {
+          message: data.message,
+          senderPsid: psid,
+          senderAvatar: data.senderAvatar,
+          timestamp,
+        });
+      } else {
+        console.log('No recipient!', data.recipientPsid);
+      }
     });
   });
 });

@@ -8,6 +8,7 @@
   "private": true,
   "dependencies": {
     "socket.io": "^2.3.0",
-    "sqlite3": "^4.1.1"
+    "sqlite3": "^4.1.1",
+    "restify": "^8.5.0"
   }
 }

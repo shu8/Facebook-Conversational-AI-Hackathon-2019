@@ -6,13 +6,13 @@
 }
 
 .icon-container{
-    background-colour: lavender;
+    background-color: lavender;
     border: 1px solid #fff;
     height: 100%;
 }
 
 .name-container{
-    background-colour: lavenderblush;
+    background-color: lavenderblush;
     border: 1px solid #fff;
     height: 100%;
 }
@@ -28,4 +28,21 @@
 #emotion-display{
     height: 20%;
     text-align: center;
+}
+
+#friendsList ul li {
+    cursor: pointer;
+}
+
+#chat-messages {
+    display: flex;
+    flex-direction: column;
+}
+
+#chat-messages .sender {
+    text-align: right;
+}
+
+#chat-messages .recipient {
+    text-align: left;
 }

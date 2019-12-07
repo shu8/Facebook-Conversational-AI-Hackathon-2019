@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
+
+<head>
 	<meta charset="utf-8">
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
@@ -13,40 +14,59 @@
 	<!-- ensures the bootstrap3 design to be responsive to mobile devices -->
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
 
+	<script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
 	<!-- input my personl css file -->
-	<link rel="stylesheet" href="style.css"/>
-    </head>
-    <body>
-	
-	<div class="container-fluid main-container" style="background-color:#E5E7E9">
-	    <h3>Kaiwa Sensei Chatroom</h3>
-	    <p>Be more considerate</p>
-	    <div class="row" style="height: 10%;">
-		<div class="col-xs-3 h-25 d-inline-block icon-container" style="background-color:lavender;"> icon </div>
-		<div class="col-xs-9 h-25 d-inline-block name-container" style="background-color:lavenderblush;"> message to: </div>
-	    </div>
-	    <div class="row" id="chat-container">
-		<div class="col-xs-12" style="background-color:orange;"> Message centre </div>
-	    </div>
-	    <div class="row" style="height:10%;">
-		<div class="col-xs-9 input-container" style="background-color:cyan;">
-		    <div class="form-group">
-			<label for="usr"input message</label>
-			<input type="text" class="form-control" id="user-message" size="45">
-		    </div>
-		</div>
-		<div class="col-xs-3 d-inline-block" style="background-color:pink;">
-		    <button onclick="send_message()" type="button" class="btn btn-success"> SEND </button>
-		</div>
-	    </div>
-	    <div class="row" id="emotion-display">
-		<div class="col-xs-12" style="background-color:#FCF3CF;">
-		    <p>:Current Chat vibe:</p>
-		</div>
-	    </div>
-	</div>
-    </body>
+	<link rel="stylesheet" href="style.css" />
+</head>
 
-    <!-- adding chat logic with javascript -->
-    <!-- <script src="chat.js"></script> -->
+<body>
+	<div id="friendsModal" class="modal" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Choose a friend!</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p id="friendsList"></p>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="container-fluid main-container" style="background-color:#E5E7E9">
+		<h3>Kaiwa Sensei Chatroom</h3>
+		<p>Be more considerate</p>
+		<div class="row" style="height: 10%;">
+			<div class="col-xs-3 h-25 d-inline-block icon-container" style="background-color:lavender;"> icon </div>
+			<div class="col-xs-9 h-25 d-inline-block name-container" style="background-color:lavenderblush;"> message
+				to: </div>
+		</div>
+		<div class="row" id="chat-container">
+			<div class="col-xs-12" style="background-color:orange;" id="chat-messages">
+
+			</div>
+		</div>
+		<div class="row" style="height:10%;">
+			<div class="col-xs-9 input-container" style="background-color:cyan;">
+				<div class="form-group">
+					<input type="text" class="form-control" id="user-message" size="125">
+				</div>
+			</div>
+			<div class="col-xs-3 d-inline-block" style="background-color:pink;">
+				<button id="send-message" type="button" class="btn btn-success"> SEND </button>
+			</div>
+		</div>
+		<div class="row" id="emotion-display">
+			<div class="col-xs-12" style="background-color:#FCF3CF;">
+				<p>:Current Chat vibe:</p>
+			</div>
+		</div>
+	</div>
+	<!-- adding chat logic with javascript -->
+	<script src="chat.js"></script>
+</body>
+
+
 </html>
