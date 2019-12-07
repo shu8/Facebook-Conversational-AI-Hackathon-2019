@@ -1,6 +1,7 @@
 const restify = require('restify');
 const socketio = require('socket.io');
 const sqlite = require('sqlite3');
+const request = require('request');
 const fs = require('fs');
 
 const server = restify.createServer({
@@ -9,6 +10,7 @@ const server = restify.createServer({
   socketio: true,
 });
 const io = socketio.listen(server.server);
+const PAGE_ACCESS_TOKEN = 'EAAKnsfEUQQsBAAZCk3lnCSz4WtfVhi5BiMKwcs1aajfu79r6KA20byyPvMz4ZCPik0aEBlsRDSpx7X4eoGDOgSEyEYj2aoXI6T6noxKsRve79J7coU48ua20ZA4EOhntn5Bog3BGkj76uCayvx4NEuNt1QGZApvFbjZCdZBZCAOrwZDZD';
 
 server.use(restify.plugins.acceptParser(server.acceptable));
 server.use(restify.plugins.queryParser());
@@ -20,6 +22,24 @@ server.use(
     return next();
   }
 );
+
+server.get('/api/get-user-messenger-details', (req, res, next) => {
+  request(
+    {
+      url: `https://graph.facebook.com/${req.query.psid}?fields=first_name,last_name,profile_pic&access_token=${PAGE_ACCESS_TOKEN}`,
+      json: true,
+    }, (err, resp, body) => {
+      if (err) return res.send({ error: true, message: err.toString());
+      res.send({
+        error: false,
+        details: {
+          firstName: body.first_name,
+          lastName: body.last_name,
+          avatar: body.profile_pic,
+        },
+      });
+  });
+});
 
 server.get('/api/users', (req, res, next) => {
   db.all('SELECT * FROM users', (err, users) => {
@@ -62,7 +82,6 @@ console.log('db initialised');
 
 let clients = [];
 function client(psid) {
-  console.log(clients);
   const c = clients.find(c => c.psid === psid.toString());
   return c ? c.socket : undefined;
 }
@@ -90,7 +109,7 @@ io.sockets.on('connection', socket => {
 
   socket.on('send_message', (data, callback) => {
     // data = { force, recipientPsid, message, senderAvatar }
-    console.log('user sent message', data);
+    console.log('user sent message');
     let rejected = false;
 
     if (!data.force) {
