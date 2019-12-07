@@ -1,0 +1,13 @@
+{
+  "name": "chat-server",
+  "version": "1.0.0",
+  "main": "chat-server.js",
+  "repository": "https://github.com/shu8/Facebook-Conversational-AI-Hackathon-2019/",
+  "author": "Team 16",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "socket.io": "^2.3.0",
+    "sqlite3": "^4.1.1"
+  }
+}
