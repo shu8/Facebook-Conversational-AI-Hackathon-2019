@@ -10,6 +10,6 @@ server.get('/*', restify.plugins.serveStatic({
   default: 'index.html'
 }))
 
-server.listen(8083, () => {
-  console.log('Restify Chat Webview running on port 8083');
+server.listen(process.env.PORT || 8083, () => {
+  console.log(`Restify Chat Webview running on port ${process.env.PORT || 8083}`);
 });
