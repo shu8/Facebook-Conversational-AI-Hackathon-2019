@@ -29,7 +29,7 @@ server.get('/api/get-user-messenger-details', (req, res, next) => {
       url: `https://graph.facebook.com/${req.query.psid}?fields=first_name,last_name,profile_pic&access_token=${PAGE_ACCESS_TOKEN}`,
       json: true,
     }, (err, resp, body) => {
-      if (err) return res.send({ error: true, message: err.toString());
+      if (err) return res.send({ error: true, message: err.toString() });
       res.send({
         error: false,
         details: {
