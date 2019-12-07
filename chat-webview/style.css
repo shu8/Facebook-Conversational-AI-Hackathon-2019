@@ -1,0 +1,28 @@
+#chat-container{
+    display: flex;
+    justify-content: center;
+    border: 1px solid #fff;
+    height: 50%;
+}
+
+.icon-container{
+    background-colour: lavender;
+    border: 1px solid #fff;
+    height: 100%;
+}
+
+.name-container{
+    background-colour: lavenderblush;
+    border: 1px solid #fff;
+    height: 100%;
+}
+
+.main-container{
+    height: 700px;
+}
+
+.input-container{
+    text-align:center;
+}
+
+
