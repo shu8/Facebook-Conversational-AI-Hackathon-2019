@@ -1,0 +1,14 @@
+{
+  "name": "facebook-hackathon",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": "git@github.com:shu8/Facebook-Conversational-AI-Hackathon-2019.git",
+  "author": "Shubham Jain <shubham.jain@hotmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "restify": "^8.5.0"
+  }
+}
