@@ -124,19 +124,15 @@ def text_to_emoji(input_text, max_length):
     # Find the words that are contributing to the feeling
     user_positive_words = []
     user_negative_words = []
-    if user_feelings == 'positive':
-        for word in input_text.split(' '):
-            for positive_word in positive_words:
-                if word == positive_word:
-                    user_positive_words.append(word) 
-        json_to_bot = {user_feelings: user_positive_words}
-    elif user_feelings == 'negative':
-        for word in input_text.split(' '):
-            for negative_word in negative_words:
-                if word == negative_word:
-                    user_negative_words.append(word)
-        json_to_bot = {user_feelings: user_negative_words}
-    return(f'json to bot: {json_to_bot}');
+    
+    for word in input_text.split(' '):
+        if word in positive_words:
+            user_positive_words.append(word)
+        elif word in negative_words:
+            user_negative_words.append(word)
+
+    json_to_bot = {'positive': user_positive_words, 'negative': user_negative_words}
+    return(f'json to bot: {json_to_bot}')
 
 # the actual script
 user_text = sys.argv[1]
