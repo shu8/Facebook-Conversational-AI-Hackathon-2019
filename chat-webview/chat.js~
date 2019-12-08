@@ -1,0 +1,19 @@
+//Function that gets fired when the user clicks on the SEND Button
+function send_message() {
+    //Get the message from the input text box 
+    var message = document.getElementById("user-message").value;
+
+    //get the element to which the new messages will append to
+    var chat_container = document.getElementById("chat-container");
+
+    //Create a new paragraph element
+    var new_message = document.createElement("p");
+    //Create the new text node element
+    var new_message_content = document.createTextNode(message);
+
+    //now append the new text node to the chat container
+    chat_container.appendChild(new_message);
+
+    //Now insert the new element into the body
+    document.body.insertBefore(chat_container, 
+    

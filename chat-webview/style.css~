@@ -1,0 +1,5 @@
+.chat-container{
+    background-color: green;
+    display: flex;
+    justify-content: center;
+    border: 1px solid #fff;

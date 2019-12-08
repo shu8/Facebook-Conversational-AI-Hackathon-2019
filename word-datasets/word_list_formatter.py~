@@ -1,0 +1,14 @@
+import sys
+
+#get the file that you want to format
+word_file = sys.arg[1]
+
+#first pass is to remove any dashes inbetween words that exist 
+#for every line in the file
+#open(f"{word_file}_parsed.txt", 'a') as output_file
+open(word_file, 'r') as input_file
+for line in input_file:
+    for word in line.split():
+        print(word)
+
+close(word_file)
