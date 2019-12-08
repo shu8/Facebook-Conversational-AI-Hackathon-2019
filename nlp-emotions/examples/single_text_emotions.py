@@ -141,5 +141,5 @@ max_length_input = int(sys.argv[2])
 
 #run the function
 result_json = text_to_emoji(user_text, max_length_input)
-print(result_json)
+print(f'json to bot: {result_json}')
 
