@@ -132,7 +132,13 @@ def text_to_emoji(input_text, max_length):
         elif word in negative_words:
             user_negative_words.append(word)
 
-    json_to_bot = {"user_emotion": user_feelings, "positive": user_positive_words, "negative": user_negative_words}
+    # map to emojis
+    emojis = map(lambda x: EMOJIS[x], emotion_ids)
+    #print(f'emojis: {list(emojis)}')
+    main_vibe = list(emojis)[0]
+    #print(f'main_vibe: {main_vibe}')
+
+    json_to_bot = {"user_emotion": user_feelings, "positive": user_positive_words, "negative": user_negative_words, "main_vibe": main_vibe}
     return json.dumps(json_to_bot)
 
 # the actual script

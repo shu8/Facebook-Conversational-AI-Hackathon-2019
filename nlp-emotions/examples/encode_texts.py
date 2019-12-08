@@ -33,6 +33,8 @@ print(model)
 print('Encoding texts..')
 encoding = model(tokenized)
 
+print(f'model encoding: {encoding}')
+
 print('First 5 dimensions for sentence: {}'.format(TEST_SENTENCES[0]))
 print(encoding[0,:5])
 
