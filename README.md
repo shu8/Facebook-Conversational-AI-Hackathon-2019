@@ -1,144 +1,32 @@
-# Original Coast Clothing Messenger Bot
+# Kaiwa Sensei
 
-Original Coast Clothing (OC) is a fictional clothing brand created to showcase key features of the Messenger Platform. OC leverages key features to deliver a great customer experience. Using this demo as inspiration, you can create a delightful messaging experience that leverages both automation and live customer support. We are also providing the open source code of the app and a guide to deploy the experience on your local environment or remote server.
+Kaiwa Sensei is a Sentiment Analysis Facebook Messenger bot that displays the conversation's mood during the conversation.
 
-[Access the Messenger experience](https://m.me/OriginalCoastClothing?ref=GITHUB)
+It was developed as part of the [Facebook Developer Circles London: Building Conversational AI for Messenger](https://facebook-dev-c-london.devpost.com/) Hackathon (07/12/19-08/12/19), by UCL students [Shubham](https://github.com/shu8), [Dylan](https://github.com/deCourier), [Tsz](https://github.com/gheylam), [Gabriel](https://github.com/Zaylar), [Ana](https://github.com/ak47na).
 
-![Messenger Experience](public/experience.png)
+See the [DevPost](https://devpost.com/software/kaiwa-sensei-sentiment-analysis-of-messenger-messages) for more background on our project!
 
-See the [Developer Documentations on this experience](https://developers.facebook.com/docs/messenger-platform/getting-started/sample-apps/original-coast-clothing).
+## Architecture
 
-# Setting up your Messenger App
+![System architecture](./promo/architecture.png)
 
-## Requirements
+The project is split into 2 parts: a web chat interface and a Pytorch-backed ML model for the Sentiment Analysis.
 
-- **Facebook Page:** Will be used as the identity of your messaging experience. When people chat with your page. To create a new Page, visit https://www.facebook.com/pages/create.
-- **Facebook Developer Account:** Required to create new apps, which are the core of any Facebook integration. You can create a new developer account by going to the [Facebook Developers website](https://developers.facebook.com/) and clicking the "Get Started" button.
-- **Facebook App:** Contains the settings for your Messenger automation, including access tokens. To create a new app, visit your [app dashboard](https://developers.facebook.com/apps).
+The web chat interface and Messenger chat extension bot are developed in Node.JS and JavaScript.
 
-## Setup Steps
+The Sentiment Analysis is done in Python using Pytorch and [Deepmoji](https://deepmoji.mit.edu/). Note that the [Python/Pytorch implementation](https://github.com/huggingface/torchMoji/) library has been patched within this repo to make it work for the latest version of Python 3.
 
-Before you begin, make sure you have completed all of the requirements listed above. At this point you should have a Page and a registered Facebook App.
+- The `./chat-webview` directory contains the client-side code for the chat application.
+- The `./nlp-emotions` directory contains the patched version of TorchMoji.
+  The `./nlp-emotions/examples/single_text_emotions.py` file contains the code used by the bot to determine a sentence's mood
+- The `./word-datasets` directory contains word datasets used in the project
 
-#### Get the App id and App Secret
+## How it works
 
-1. Go to your app Basic Settings, [Find your app here](https://developers.facebook.com/apps)
-2. Save the **App ID** number and the **App Secret**
+The `./nlp-emotions/examples/single_text_emotions.py` Python script uses the emojis results to determine what the overall mood of a sentence is. The script returns a JSON string containing the fields `positive` (the positive words in the sentence), `negative` (the negative words in the sentence), `user_emotion` (`positive` and `negative`), and `main_vibe` (an emoji that describes the overall mood of the conversation).
 
-#### Grant  Messenger access to your Facebook App
+The `index.js` file is the main server file that manages the Node.JS/Socket.IO HTTP server/websocket server for the client to talk to.
 
-1. Go to your app Dashboard
-2. Under Add Product find Messenger and click Set Up
-3. Now you should be in the App Messenger Settings
-4. Under Access Tokens, click on Edit Permissions
-5. Select the desired page and allow Manage and access Page conversations in Messenger
-6. Select the desired page and an access token should appear
-7. Get the Page ID from the page access token by using the [Access Token Debugger](https://developers.facebook.com/tools/debug/accesstoken/)
-8. In the section Built-In NLP, select your page and enable the toggle
+## Remarks
 
-# Installation
-
-Clone this repository on your local machine:
-
-```bash
-$ git clone git@github.com:fbsamples/original-coast-clothing.git
-$ cd original-coast-clothing
-```
-
-You will need:
-
-- [Node](https://nodejs.org/en/) 10.x or higher
-- [Localtunnel](https://github.com/localtunnel/localtunnel) or remote server like [Heroku](https://www.heroku.com/)
-
-# Usage
-
-## Using Local Tunnel
-
-#### 1. Install the dependencies
-
-```bash
-$ npm install
-```
-
-Alternatively, you can use [Yarn](https://yarnpkg.com/en/):
-
-```bash
-$ yarn install
-```
-
-#### 2. Install Local Tunnel
-```bash
-npm install -g localtunnel
-```
-
-Open a new terminal tab and request a tunnel to your local server with your preferred port
-```bash
-lt --port 3000
-```
-
-#### 3. Rename the file `.sample.env` to `.env`
-
-```bash
-mv .sample.env .env
-```
-
- Edit the `.env` file to add all the values for your app and page. Then run your app locally using the built-in web server
-
-#### 4. Run your app locally using the built-in web server<
-
-```bash
-node app.js
-```
-
-You should now be able to access the application in your browser at [http://localhost:3000](http://localhost:3000)
-
-#### 5. Configure your webhook subcription and set the Messenger profile
-
-Use the `VERIFY_TOKEN` that you created in `.env` file and call the **/profile** endpoint like so:
-```
-http://localhost:3000/profile?mode=all&verify_token=verify-token
-```
-
-#### 6. Test that your app setup is successful
-
-Send a message to your Page from Facebook or in Messenger, if your webhook receives an event, you have fully set up your app! Voilà!
-
-## Using Heroku
-#### 1. Install the Heroku CLI
-
-Download and install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli)
-
-#### 2. Create an app from the CLI
-
-```bash
-git init
-heroku apps:create
-# Creating app... done, ⬢ mystic-wind-83
-# Created http://mystic-wind-83.herokuapp.com/ | git@heroku.com:mystic-wind-83.git
-```
-
-#### 3. Deploy the code
-```bash
-git add .
-git commit -m "My first commit"
-git push heroku master
-```
-
-#### 4. Set your environment variables
-  In your Heroku App Dashboard [https://dashboard.heroku.com/apps/mystic-wind-83](https://dashboard.heroku.com/apps/mystic-wind-83) set up the config vars following the comments in the file ```.sample.env```
-
-#### 5. Configure your webhook subscription and set the Messenger profile
-  You should now be able to access the application. Use the ```VERIFY_TOKEN``` that you created as config vars and call the **/profile** endpoint like so:
-
-  ```
-  http://mystic-wind-83.herokuapp.com/profile?mode=all&verify_token=verify-token
-  ```
-
-#### 6. Test that your app setup is successful
-
-  Send a message to your Page from Facebook or in Messenger, if your webhook receives an event, you have fully set up your app! Voilà!
-
-## License
-Sample Messenger App Original Coast Clothing is BSD licensed, as found in the LICENSE file.
-
-See the [CONTRIBUTING](CONTRIBUTING.md) file for how to help out.
+The code is not complete due to the nature of a Hackathon. It **should not** be used in production or sensitive environments. The bot will be disabled after the Hackathon so any tokens in the repo will be obsolete.
