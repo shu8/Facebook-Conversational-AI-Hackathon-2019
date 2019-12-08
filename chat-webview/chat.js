@@ -48,6 +48,30 @@ function chosenRecipient(user) {
   connectSocket();
 }
 
+function updateConfirmModal(messageAnalysis) {
+  const $div = $('<div/>');
+  const words = messageAnalysis.sentence.split(' ');
+  words.forEach(w => {
+    if (messageAnalysis.positiveWords.includes(w)) {
+      $div.append($('<span>', {
+        text: w,
+        'class': 'word positive-word',
+      }));
+    } else if (messageAnalysis.negativeWords.includes(w)) {
+      $div.append($('<span>', {
+        text: w,
+        'class': 'word negative-word',
+      }));
+    } else {
+      $div.append($('<span>', {
+        text: w,
+        'class': 'word normal-word',
+      }));
+    }
+  });
+  $('#harmful-words').html($div);
+}
+
 function newMessageSendHandler(force = false) {
   const message = $('#user-message').val();
   window.chat.socket.emit('send_message', {
@@ -56,13 +80,14 @@ function newMessageSendHandler(force = false) {
     message,
     senderAvatar: 'https://via.placeholder.com/150.png',
   }, data => {
+    console.log(data);
     if (data.error) {
       window.alert('There was an error', data.error);
       return;
     }
 
     if (data.rejected) {
-      // TODO handle rejection
+      updateConfirmModal(data.messageAnalysis);
       $('#confirmModal').modal({ show: true });
       return;
     }

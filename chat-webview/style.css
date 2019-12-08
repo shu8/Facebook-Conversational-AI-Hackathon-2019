@@ -51,3 +51,15 @@
 #chat-messages .user-avatar.sender {
     text-align: right;
 }
+
+#confirmModal .word+.word {
+    margin-left: 2px;
+}
+
+#confirmModal .positive-word {
+    color: green;
+}
+
+#confirmModal .negative-word {
+    color: red;
+}
