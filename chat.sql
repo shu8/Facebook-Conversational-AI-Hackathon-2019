@@ -5,9 +5,9 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS messages (
-    sender_psid INTEGER,
-    recipient_psid INTEGER,
-    timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
-    message TEXT,
+    sender_psid INTEGER NOT NULL,
+    recipient_psid INTEGER NOT NULL,
+    timestamp TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    message TEXT NOT NULL,
     PRIMARY KEY (sender_psid, recipient_psid, timestamp)
 );

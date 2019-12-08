@@ -37,6 +37,7 @@
 #chat-messages {
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
 }
 
 #chat-messages .sender {
@@ -45,4 +46,8 @@
 
 #chat-messages .recipient {
     text-align: left;
+}
+
+#chat-messages .user-avatar.sender {
+    text-align: right;
 }
