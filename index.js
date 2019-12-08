@@ -3,6 +3,7 @@ const socketio = require('socket.io');
 const sqlite = require('sqlite3');
 const request = require('request');
 const fs = require('fs');
+const quote = require('shell-quote').quote;
 
 const server = restify.createServer({
   name: 'Hackathon server',
@@ -109,22 +110,34 @@ io.sockets.on('connection', socket => {
 
   socket.on('send_message', (data, callback) => {
     // data = { force, recipientPsid, message, senderAvatar }
-    console.log('user sent message', data);
+    console.log('user sent message "' + JSON.stringify(data) + '"');
     let rejected = false;
 
     if (!data.force) {
       // TODO check data.message, set rejected to true if needed
-      // const { spawn } = require('child_process');
-      // const pyProg = spawn('python', ['bot-server.py']);
+      console.log('Calling Python process');
+      const { execSync } = require('child_process');
+      const pyTorchOutput = execSync(`python3 nlp-emotions/examples/single_text_emotions.py ${quote([data.message, data.message.length])}`, {
+        timeout: 7000,
+        encoding: 'utf-8',
+      });
 
-      // pyProg.stdout.on('data', function (data) {
-      //   console.log(data.toString());
-      // });
+      pyTorchOutput.toString('utf-8').split('\n').forEach(line => {
+        if (!line.startsWith('json to bot:')) return;
+        const jsonString = line.replace('json to bot: ', '');
+        const json = JSON.parse(jsonString);
+        console.log(json);
+        if (json.user_emotion === 'negative') rejected = true;
+        messageAnalysis = {
+          positiveWords: json.positive,
+          negativeWords: json.negative,
+          sentence: data.message,
+        };
+        // Call callback in non-rejected state later -- only want to send if db insertion succeeds
+        // Tell sender it was rejected
+        if (rejected) return callback({ error: false, rejected, messageAnalysis });
+      });
     }
-
-    // Call callback in non-rejected state later -- only want to send if db insertion succeeds
-    // Tell sender it was rejected
-    if (rejected) return callback({ error: false, rejected });
 
     // TODO (future) send messenger websocket notification to recipient
     const timestamp = new Date().getTime();

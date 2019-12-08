@@ -73,7 +73,7 @@ Return true if the sentence is positive, false if negative
 '''
 def positive_or_negative(emotions):
     feelings = 0
-    print(f'emotion in function: {emotions}')
+    #print(f'emotion in function: {emotions}')
     for emotion in emotions:
         if emotion == 'positive':
             feelings += 1
@@ -113,19 +113,19 @@ def text_to_emoji(input_text, max_length):
 
     # Top emotion id
     emotion_ids = top_elements(prob, 5)
-    print(f'top five emotion ids: {emotion_ids}')
+    #print(f'top five emotion ids: {emotion_ids}')
 
     # map to emotions
     emotions = map(lambda x: EMOTIONS[x], emotion_ids)
     emotions = list(emotions)
-    print(f'emotions: {emotions}')
+    #print(f'emotions: {emotions}')
     user_feelings = positive_or_negative(emotions)
-    print(f'user_feelings: {user_feelings}')
+    #print(f'user_feelings: {user_feelings}')
 
     # Find the words that are contributing to the feeling
     user_positive_words = []
     user_negative_words = []
-    
+
     for word in input_text.split(' '):
         if word in positive_words:
             user_positive_words.append(word)
