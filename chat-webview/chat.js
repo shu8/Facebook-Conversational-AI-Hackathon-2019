@@ -1,5 +1,6 @@
-const API_URL = location.href.indexOf('herokuapp.com') > -1 ? 'https://facebook-hackathon-2019-team16.herokuapp.com/api/' : 'http://127.0.0.1:8080/api/';
-const SOCKET_URL = location.href.indexOf('herokuapp.com') > -1 ? 'https://facebook-hackathon-2019-team16.herokuapp.com/' : 'http://127.0.0.1:8080/';
+const API_URL = location.href.indexOf('herokuapp.com') > -1 ? 'https://facebook-hackathon-2019-team16.herokuapp.com/api/' : 'https://519a1d7c.ngrok.io/api/'; //'http://127.0.0.1:8080/api/';
+const SOCKET_URL = location.href.indexOf('herokuapp.com') > -1 ? 'https://facebook-hackathon-2019-team16.herokuapp.com/' : 'https://519a1d7c.ngrok.io'; //'http://127.0.0.1:8080/';
+const APP_ID = '747332649107723';
 
 function getUserDetails(psid) {
   $.get(`${API_URL}get-user-messenger-details?psid=${psid}`, response => {
@@ -126,11 +127,18 @@ function connectSocket() {
 }
 
 (() => {
-  // TODO change this to be actual PSID from messenger
   // TODO do we need a name?
+  MessengerExtensions.getContext(APP_ID, thread_context => {
+    console.log(thread_context);
+    window.chat.sender.psid = window.chat.sender.psid || thread_context.psid;
+  }, err => {
+    console.log('Error getting user ID from MessengerExtensions: error code', err);
+  });
+
   window.chat.sender = { psid: window.chat.sender.psid || window.location.hash.substring(1) };
   window.chat.recipient = { psid: window.chat.recipient.psid || undefined };
   if (!window.chat.recipient.psid) chooseRecipient();
+  if (!window.chat.sender.psid) return window.alert('Error getting current user!');
 
   $('#user-message').keypress(function (e) {
     if (e.which == 13) {
