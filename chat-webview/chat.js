@@ -8,6 +8,43 @@ function getUserDetails(psid) {
   });
 }
 
+function displayPreviousMessages() {
+  $.get(`${API_URL}messages?sender_psid=${window.chat.sender.psid}&recipient_psid=${window.chat.recipient.psid}`, response => {
+    if (!response.messages.length) return;
+    response.messages.forEach(m => addMessage(m.message, m.sender_psid.toString() === window.chat.sender.psid, new Date(m.timestamp)));
+  });
+}
+
+function chosenRecipient(user) {
+  window.chat.recipient.psid = user.user_psid;
+  $('#friendsModal').modal('hide');
+
+  // Recipient
+  getUserDetails(user.user_psid, details => {
+    $('#recipient-name').text(`${details.firstName} ${details.lastName}`);
+    window.chat.recipient = {
+      ...window.chat.recipient,
+      firstName: details.firstName,
+      lastName: details.lastName,
+      avatar: details.avatar,
+    };
+  });
+
+  // Sender
+  getUserDetails(window.chat.sender.psid, details => {
+    $('#sender-avatar').text(details.avatar);
+    window.chat.sender = {
+      ...window.chat.sender,
+      firstName: details.firstName,
+      lastName: details.lastName,
+      avatar: details.avatar,
+    };
+  });
+
+  displayPreviousMessages();
+  connectSocket();
+}
+
 function chooseRecipient() {
   $('#friendsModal').modal({ show: true });
   const $friendsList = $('#friendsList');
@@ -21,34 +58,7 @@ function chooseRecipient() {
         'class': 'friend-option',
         // TODO make this a name
         text: user.user_psid,
-        click: () => {
-          chat.recipient.psid = user.user_psid;
-          $('#friendsModal').modal('hide');
-
-          // Recipient
-          getUserDetails(user.user_psid, details => {
-            $('#recipient-name').text(`${details.firstName} ${details.lastName}`);
-            window.chat.recipient = {
-              ...window.chat.recipient,
-              firstName: details.firstName,
-              lastName: details.lastName,
-              avatar: details.avatar,
-            };
-          });
-
-          // Sender
-          getUserDetails(window.chat.sender.psid, details => {
-            $('#sender-avatar').text(details.avatar);
-            window.chat.sender = {
-              ...window.chat.sender,
-              firstName: details.firstName,
-              lastName: details.lastName,
-              avatar: details.avatar,
-            };
-          });
-
-          connectSocket();
-        },
+        click: () => chosenRecipient(user),
       }));
     });
     $friendsList.append($list);
@@ -56,10 +66,21 @@ function chooseRecipient() {
 }
 
 function addMessage(message, isSender, timestamp) {
-  $('#chat-messages').append($('<div/>', {
+  const $container = $('<div/>');
+
+  const $avatarDiv = $('<div/>', {
+    'class': `user-avatar ${isSender ? 'sender' : 'recipient'}`,
+    html: `<img src="${isSender ? window.chat.sender.avatar : window.chat.recipient.avatar}">`,
+  });
+
+  const $messageDiv = $('<div/>', {
     'class': `message ${isSender ? 'sender' : 'recipient'}`,
     text: message,
-  }));
+  });
+
+  $container.append($avatarDiv).append($messageDiv);
+
+  $('#chat-messages').append($container);
 }
 
 function connectSocket() {
