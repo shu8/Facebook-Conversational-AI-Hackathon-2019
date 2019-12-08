@@ -4,6 +4,7 @@
 """
 
 from __future__ import print_function, division, unicode_literals
+import os
 import example_helper
 import json
 import csv
@@ -91,11 +92,11 @@ def text_to_emoji(input_text, max_length):
         vocabulary = json.load(f)
     #print(f'vocabulary: {vocabulary}')
 
-    with open('negative_words_parsed.txt', 'r', encoding='utf-8', errors='ignore') as negative_words_list:
+    with open(os.path.join(os.path.dirname(__file__), './negative_words_parsed.txt'), 'r', encoding='utf-8', errors='ignore') as negative_words_list:
         negative_words = list(negative_words_list)
         negative_words = [negative_word.rstrip('\n').lower() for negative_word in negative_words if negative_word != '\n']
 
-    with open('positive_words_parsed.txt', 'r') as positive_words_list:
+    with open(os.path.join(os.path.dirname(__file__), './positive_words_parsed.txt'), 'r') as positive_words_list:
         positive_words = list(positive_words_list)
         positive_words = [positive_word.rstrip('\n').lower() for positive_word in positive_words if positive_word != '\n']
 
@@ -128,7 +129,7 @@ def text_to_emoji(input_text, max_length):
         for word in input_text.split(' '):
             for positive_word in positive_words:
                 if word == positive_word:
-                    user_positive_words.append(word) 
+                    user_positive_words.append(word)
         json_to_bot = {user_feelings: user_positive_words}
     elif user_feelings == 'negative':
         for word in input_text.split(' '):
