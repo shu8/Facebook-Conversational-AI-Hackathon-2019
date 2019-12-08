@@ -1,17 +1,23 @@
-const API_URL = location.href.indexOf('herokuapp.com') > -1 ? 'https://facebook-hackathon-2019-team16.herokuapp.com/api/' : 'https://519a1d7c.ngrok.io/api/'; //'http://127.0.0.1:8080/api/';
-const SOCKET_URL = location.href.indexOf('herokuapp.com') > -1 ? 'https://facebook-hackathon-2019-team16.herokuapp.com/' : 'https://519a1d7c.ngrok.io'; //'http://127.0.0.1:8080/';
+const API_URL = location.href.indexOf('herokuapp.com') > -1 ? 'https://facebook-hackathon-2019-team16.herokuapp.com/api/' : 'https://56882f81.ngrok.io/api/'; //'http://127.0.0.1:8080/api/';
+const SOCKET_URL = location.href.indexOf('herokuapp.com') > -1 ? 'https://facebook-hackathon-2019-team16.herokuapp.com/' : 'https://56882f81.ngrok.io'; //'http://127.0.0.1:8080/';
 const APP_ID = '747332649107723';
 
-function getUserDetails(psid) {
+function getUserDetails(psid, callback) {
+  console.log('calling messenger API with psid', psid);
   $.get(`${API_URL}get-user-messenger-details?psid=${psid}`, response => {
-    if (response.error || !response.details.length) return {};
-    return response.details;
+    console.log(response);
+    if (
+      response.error
+      || !response.details
+      || !Object.keys(response.details).length
+    ) return callback({});
+    return callback(response.details);
   });
 }
 
 function displayPreviousMessages() {
   $.get(`${API_URL}messages?sender_psid=${window.chat.sender.psid}&recipient_psid=${window.chat.recipient.psid}`, response => {
-    if (!response.messages.length) return;
+    if (!response.messages || !response.messages.length) return;
     response.messages.forEach(m =>
       addMessage(m.message, m.sender_psid.toString() === window.chat.sender.psid, new Date(m.timestamp))
     );
@@ -24,6 +30,7 @@ function chosenRecipient(user) {
 
   // Recipient
   getUserDetails(user.user_psid, details => {
+    console.log(details);
     $('#recipient-name').text(`${details.firstName} ${details.lastName}`);
     $('#recipient-avatar').html(`<img src="${details.avatar}">`);
     window.chat.recipient = {
@@ -36,6 +43,7 @@ function chosenRecipient(user) {
 
   // Sender
   getUserDetails(window.chat.sender.psid, details => {
+    console.log(details);
     window.chat.sender = {
       ...window.chat.sender,
       firstName: details.firstName,
@@ -78,13 +86,15 @@ function newMessageSendHandler(force = false) {
     force,
     recipientPsid: window.chat.recipient.psid,
     message,
-    senderAvatar: 'https://via.placeholder.com/150.png',
+    senderAvatar: window.chat.sender.avatar,
   }, data => {
     console.log(data);
     if (data.error) {
       window.alert('There was an error', data.error);
       return;
     }
+
+    updateEmoji(data.vibe);
 
     if (data.rejected) {
       updateConfirmModal(data.messageAnalysis);
@@ -136,7 +146,12 @@ function addMessage(message, isSender, timestamp) {
   $messages.scrollTop($messages[0].scrollHeight);
 }
 
+function updateEmoji(emoji = '') {
+  if (emoji !== '') $('#emotionDisplay').text(emoji);
+}
+
 function connectSocket() {
+  console.log(window.chat);
   window.chat.socket = io(`${SOCKET_URL}?psid=${window.chat.sender.psid}&first_name=${window.chat.sender.firstName}&last_name=${window.chat.sender.lastName}`);
   window.chat.socket.on('connect', () => {
     console.log('socket connected');
@@ -148,12 +163,13 @@ function connectSocket() {
 
   window.chat.socket.on('message', data => {
     addMessage(data.message, false, data.timestamp);
+    updateEmoji(data.vibe);
   });
 }
 
 (() => {
   // TODO do we need a name?
-  MessengerExtensions.getContext(APP_ID, thread_context => {
+  window.MessengerExtensions.getContext(APP_ID, thread_context => {
     console.log(thread_context);
     window.chat.sender.psid = window.chat.sender.psid || thread_context.psid;
   }, err => {
@@ -163,16 +179,17 @@ function connectSocket() {
   window.chat.sender = { psid: window.chat.sender.psid || window.location.hash.substring(1) };
   window.chat.recipient = { psid: window.chat.recipient.psid || undefined };
   if (!window.chat.recipient.psid) chooseRecipient();
-  if (!window.chat.sender.psid) return window.alert('Error getting current user!');
 
   $('#user-message').keypress(function (e) {
     if (e.which == 13) {
-      newMessageSendHandler();
+      newMessageSendHandler(false);
       return false;
     }
   });
 
-  $('#send-message').click(newMessageSendHandler);
+  $('#send-message').click(function () {
+    newMessageSendHandler(false);
+  });
 
   $('#send-message-confirm').click(function () {
     newMessageSendHandler(true);

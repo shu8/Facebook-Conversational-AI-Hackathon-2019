@@ -4,6 +4,7 @@ const sqlite = require('sqlite3');
 const request = require('request');
 const fs = require('fs');
 const quote = require('shell-quote').quote;
+const name = require("emoji-name-map");
 
 const server = restify.createServer({
   name: 'Hackathon server',
@@ -30,6 +31,7 @@ server.get('/api/get-user-messenger-details', (req, res, next) => {
       url: `https://graph.facebook.com/${req.query.psid}?fields=first_name,last_name,profile_pic&access_token=${PAGE_ACCESS_TOKEN}`,
       json: true,
     }, (err, resp, body) => {
+      console.log(body);
       if (err) return res.send({ error: true, message: err.toString() });
       res.send({
         error: false,
@@ -112,6 +114,7 @@ io.sockets.on('connection', socket => {
     // data = { force, recipientPsid, message, senderAvatar }
     console.log('user sent message "' + JSON.stringify(data) + '"');
     let rejected = false;
+    let vibe = '';
 
     if (!data.force) {
       // TODO check data.message, set rejected to true if needed
@@ -133,12 +136,19 @@ io.sockets.on('connection', socket => {
           negativeWords: json.negative,
           sentence: data.message,
         };
+        vibe = json.main_vibe;
         // Call callback in non-rejected state later -- only want to send if db insertion succeeds
         // Tell sender it was rejected
-        if (rejected) return callback({ error: false, rejected, messageAnalysis });
+        if (rejected) {
+          console.log(vibe);
+          return callback({
+            error: false, rejected, messageAnalysis, vibe: vibe ? name.get(vibe) : '',
+          });
+        }
       });
     }
 
+    if (rejected) return;
     // TODO (future) send messenger websocket notification to recipient
     const timestamp = new Date().getTime();
     db.run('INSERT INTO messages (sender_psid, recipient_psid, message) VALUES (?, ?, ?)', psid, data.recipientPsid, data.message, err => {
@@ -147,7 +157,10 @@ io.sockets.on('connection', socket => {
         callback({ error: true, message: err.toString(), rejected });
         return console.log('Error inserting message into db', err);
       }
-      callback({ error: false, rejected: false, timestamp });
+      console.log('vibe is', vibe);
+      callback({
+        error: false, rejected: false, timestamp, vibe: vibe ? name.get(vibe) : '',
+      });
 
       // Send message to recipient
       const recipient = client(data.recipientPsid);
@@ -157,6 +170,7 @@ io.sockets.on('connection', socket => {
           senderPsid: psid,
           senderAvatar: data.senderAvatar,
           timestamp,
+          vibe: vibe ? name.get(vibe) : '',
         });
       } else {
         console.log('No recipient!', data.recipientPsid);

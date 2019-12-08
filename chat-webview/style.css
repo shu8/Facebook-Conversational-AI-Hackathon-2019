@@ -48,6 +48,14 @@
     text-align: left;
 }
 
+#recipient-avatar img {
+    width: 100%;
+}
+
+.user-avatar img {
+    width: 10%;
+}
+
 #chat-messages .user-avatar.sender {
     text-align: right;
 }
@@ -58,8 +66,16 @@
 
 #confirmModal .positive-word {
     color: green;
+    font-weight: bold;
 }
 
 #confirmModal .negative-word {
     color: red;
+    font-weight: bold;
+}
+
+#emotionDisplay {
+    font-size: 35px;
+    margin-top: -15px;
+    text-align: center;
 }
