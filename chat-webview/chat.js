@@ -60,7 +60,7 @@ function newMessageSendHandler(force = false) {
       return;
     }
 
-      if (!data.rejected) {
+      if (data.rejected) {
       // TODO handle rejection
       $('#confirmModal').modal({ show: true });
       return;
