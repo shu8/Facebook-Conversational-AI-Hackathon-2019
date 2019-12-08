@@ -58,7 +58,7 @@ server.get('/api/messages', (req, res, next) => {
     return res.send({ error: true, message: 'Sender and Recipient PSIDs not specified ' });
   }
 
-  db.all('SELECT * FROM messages WHERE (sender_psid = ? AND recipient_psid = ?) OR (recipient_psid = ? AND sender_psid = ?) ORDER BY TIMESTAMP DESC', req.query.sender_psid, req.query.recipient_psid, req.query.sender_psid, req.query.recipient_psid, (err, messages) => {
+  db.all('SELECT * FROM messages WHERE (sender_psid = ? AND recipient_psid = ?) OR (recipient_psid = ? AND sender_psid = ?) ORDER BY TIMESTAMP ASC', req.query.sender_psid, req.query.recipient_psid, req.query.sender_psid, req.query.recipient_psid, (err, messages) => {
     if (err) {
       console.log('Unable to get messages from database', err);
       return res.send({ error: true, message: err.toString() });

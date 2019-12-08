@@ -11,7 +11,9 @@ function getUserDetails(psid) {
 function displayPreviousMessages() {
   $.get(`${API_URL}messages?sender_psid=${window.chat.sender.psid}&recipient_psid=${window.chat.recipient.psid}`, response => {
     if (!response.messages.length) return;
-    response.messages.forEach(m => addMessage(m.message, m.sender_psid.toString() === window.chat.sender.psid, new Date(m.timestamp)));
+    response.messages.forEach(m =>
+      addMessage(m.message, m.sender_psid.toString() === window.chat.sender.psid, new Date(m.timestamp))
+    );
   });
 }
 
@@ -45,6 +47,30 @@ function chosenRecipient(user) {
   connectSocket();
 }
 
+function newMessageSendHandler(force = false) {
+  const message = $('#user-message').val();
+  window.chat.socket.emit('send_message', {
+    force,
+    recipientPsid: window.chat.recipient.psid,
+    message,
+    senderAvatar: 'https://via.placeholder.com/150.png',
+  }, data => {
+    if (data.error) {
+      window.alert('There was an error', data.error);
+      return;
+    }
+
+      if (!data.rejected) {
+      // TODO handle rejection
+      $('#confirmModal').modal({ show: true });
+      return;
+    }
+
+    $('#user-message').val('');
+    addMessage(message, true, data.timestamp);
+  });
+}
+
 function chooseRecipient() {
   $('#friendsModal').modal({ show: true });
   const $friendsList = $('#friendsList');
@@ -57,7 +83,7 @@ function chooseRecipient() {
       $list.append($('<li/>', {
         'class': 'friend-option',
         // TODO make this a name
-        text: user.user_psid,
+        text: `${user.user_first_name} ${user.user_last_name}`,
         click: () => chosenRecipient(user),
       }));
     });
@@ -80,7 +106,9 @@ function addMessage(message, isSender, timestamp) {
 
   $container.append($avatarDiv).append($messageDiv);
 
-  $('#chat-messages').append($container);
+  const $messages = $('#chat-messages');
+  $messages.append($container);
+  $messages.scrollTop($messages[0].scrollHeight);
 }
 
 function connectSocket() {
@@ -98,31 +126,28 @@ function connectSocket() {
   });
 }
 
-((chat) => {
+(() => {
   // TODO change this to be actual PSID from messenger
+  // TODO do we need a name?
   window.chat.sender = { psid: window.chat.sender.psid || window.location.hash.substring(1) };
   window.chat.recipient = { psid: window.chat.recipient.psid || undefined };
   if (!window.chat.recipient.psid) chooseRecipient();
 
-  $('#send-message').click(function () {
-    const message = $('#user-message').val();
-    window.chat.socket.emit('send_message', {
-      force: false,
-      recipientPsid: window.chat.recipient.psid,
-      message,
-      senderAvatar: 'https://via.placeholder.com/150.png',
-    }, data => {
-        if (data.error) {
-          // TODO handle error
-          return;
-        }
+  $('#user-message').keypress(function (e) {
+    if (e.which == 13) {
+      newMessageSendHandler();
+      return false;
+    }
+  });
 
-        if (data.rejected) {
-          // TODO handle rejection
-          return;
-        }
+  $('#send-message').click(newMessageSendHandler);
 
-        addMessage(message, true, data.timestamp);
-    });
+  $('#send-message-confirm').click(function () {
+    newMessageSendHandler(true);
+    $('#confirmModal').modal('hide');
+  });
+
+  $('#send-message-stop').click(function () {
+    $('#confirmModal').modal('hide');
   });
 })(window.chat = { sender: {}, recipient: {}} || window.chat);
