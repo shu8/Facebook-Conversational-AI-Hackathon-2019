@@ -24,6 +24,7 @@ function chosenRecipient(user) {
   // Recipient
   getUserDetails(user.user_psid, details => {
     $('#recipient-name').text(`${details.firstName} ${details.lastName}`);
+    $('#recipient-avatar').html(`<img src="${details.avatar}">`);
     window.chat.recipient = {
       ...window.chat.recipient,
       firstName: details.firstName,
@@ -34,7 +35,6 @@ function chosenRecipient(user) {
 
   // Sender
   getUserDetails(window.chat.sender.psid, details => {
-    $('#sender-avatar').text(details.avatar);
     window.chat.sender = {
       ...window.chat.sender,
       firstName: details.firstName,
@@ -60,7 +60,7 @@ function newMessageSendHandler(force = false) {
       return;
     }
 
-      if (data.rejected) {
+    if (data.rejected) {
       // TODO handle rejection
       $('#confirmModal').modal({ show: true });
       return;
@@ -82,7 +82,6 @@ function chooseRecipient() {
       if (user.user_psid.toString() === window.chat.sender.psid) return;
       $list.append($('<li/>', {
         'class': 'friend-option',
-        // TODO make this a name
         text: `${user.user_first_name} ${user.user_last_name}`,
         click: () => chosenRecipient(user),
       }));

@@ -114,6 +114,12 @@ io.sockets.on('connection', socket => {
 
     if (!data.force) {
       // TODO check data.message, set rejected to true if needed
+      // const { spawn } = require('child_process');
+      // const pyProg = spawn('python', ['bot-server.py']);
+
+      // pyProg.stdout.on('data', function (data) {
+      //   console.log(data.toString());
+      // });
     }
 
     // Call callback in non-rejected state later -- only want to send if db insertion succeeds
